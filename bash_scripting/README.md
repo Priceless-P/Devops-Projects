@@ -9,7 +9,7 @@ This Bash script automates the collection and reporting of system metrics and st
 1. Clone this repository to your local machine:
 
     ```bash
-    git clone https://github.com/your-username/server-health-checker.git
+    git clone https://github.com/Priceless-P/Devops-Projects.git
     ```
 
 2. Make the script executable:
