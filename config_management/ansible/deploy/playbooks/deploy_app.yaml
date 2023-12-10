@@ -1,0 +1,6 @@
+---
+- name: Deploy application
+  hosts: user_service_servers
+  roles:
+    - user_service_role
+    - product_service_role

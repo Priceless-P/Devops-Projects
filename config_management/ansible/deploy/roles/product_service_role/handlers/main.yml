@@ -1,0 +1,6 @@
+---
+# handlers file for product_service_role
+- name: Restart product service container
+  become: true
+  command: >
+    docker compose -f "{{ full_path }}"/{{ app_name_product_service }}/docker-compose restart

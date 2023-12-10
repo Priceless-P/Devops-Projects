@@ -1,0 +1,11 @@
+---
+# tasks file for product_service_role
+- name: Build and run Docker container for product service
+  become: true
+  command: >
+    docker compose -f "{{ full_path }}/{{ app_name_product_service }}/docker-compose.yml" up -d
+  args:
+    chdir:
+      "{{ full_path }}/{{ app_name_product_service }}"
+  tags: [deploy_product_service]
+  when: inventory_hostname_in_groups['product_service_servers']

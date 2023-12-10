@@ -1,0 +1,29 @@
+---
+# tasks file for config_role
+- name: Update system packages
+  yum:
+    name: "*"
+    state: latest
+
+- name: Install required system packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3
+    - pip
+    - git
+    - docker
+  tags: [common_packages]
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: start
+    enabled: true
+
+- name: Clone repo
+  git:
+    repo: "{{ github_repo }}"
+    dest: "{{ full_path }}"
+  tags: [clone]

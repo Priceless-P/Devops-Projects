@@ -1,0 +1,6 @@
+---
+# vars file for product_service_role
+app_name_product_service: "product_service"
+github_repo: "https://github.com/Priceless-P/comercio.git"
+dest_path_base: "/home"
+full_path: "{{ dest_path_base }}/comercio"

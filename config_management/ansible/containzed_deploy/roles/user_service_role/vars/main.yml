@@ -1,0 +1,6 @@
+---
+# vars file for user_service_role
+app_name_user_service: "user_service"
+github_repo: "https://github.com/Priceless-P/comercio.git"
+dest_path_base: "/home"
+full_path: "{{ dest_path_base }}/comercio"

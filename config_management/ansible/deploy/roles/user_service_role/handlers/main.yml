@@ -1,0 +1,6 @@
+---
+# handlers file for user_service_role
+- name: Restart user service
+  become: true
+  command: >
+    docker-compose -f "{{ full_path }}/{{ app_name_user_service }}/docker-compose.yml" restart

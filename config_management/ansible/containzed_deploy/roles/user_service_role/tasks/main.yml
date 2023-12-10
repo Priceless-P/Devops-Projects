@@ -1,0 +1,10 @@
+---
+# tasks file for user_service_role
+- name: Build and run Docker container for user service
+  become: true
+  command: >
+    docker-compose -f "{{ full_path }}/{{ app_name_user_service }}/docker-compose.yml" up -d
+  args:
+    chdir: "{{ full_path }}/{{ app_name_user_service }}"
+  tags: [deploy_user_service]
+  when: inventory_hostname_in_groups['user_service_servers']

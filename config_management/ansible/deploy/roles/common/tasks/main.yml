@@ -1,0 +1,32 @@
+---
+# tasks file for config_role
+- name: Update system packages
+  yum:
+    name: "*"
+    state: latest
+
+- name: Install required system packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3
+    - python3-pip
+    - pip
+    - git
+  tags: [common_packages]
+
+- name: Clone repo
+  git:
+    repo: "{{ github_repo }}"
+    dest: "{{ full_path }}"
+  tags: [clone]
+
+- name: Create virtual Environment
+  command:
+    python3 -m venv venv
+  tags: [venv_setup]
+
+- name: Activate virtual environment
+  command:  source "{{ full_path }}/venv/bin/activate"
+  tags: [venv_activate]
