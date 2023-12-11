@@ -1,12 +1,12 @@
 resource "aws_key_pair" "user_service_key" {
     key_name = var.user_service_key_name
-    public_key = file("/home/prisca_priceless11/.ssh/user_service_key.pub")
+    public_key = "/home/prisca_priceless11/.ssh/user_service_key.pub"
 
 }
 
 resource "aws_key_pair" "product_service_key" {
     key_name = var.product_service_key_name
-    public_key = file("/home/prisca_priceless11/.ssh/product_service_key.pub")
+    public_key = "/home/prisca_priceless11/.ssh/product_service_key.pub"
 }
 
 resource "aws_instance" "user_service_instance" {
