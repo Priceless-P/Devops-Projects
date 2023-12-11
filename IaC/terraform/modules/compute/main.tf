@@ -29,7 +29,7 @@ resource "aws_instance" "product_service_instance" {
 data "template_file" "ansible_inventory" {
     template = file("${path.module}/ansible_inventory.tpl")
     vars = {
-      user_instance = aws_instance.user_service_instance
-      product_instance = aws_instance.product_service_instance
+      user_instance = aws_instance.user_service_instance.id
+      product_instance = aws_instance.product_service_instance.id
     }
 }
