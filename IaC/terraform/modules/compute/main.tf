@@ -1,12 +1,12 @@
 resource "aws_key_pair" "user_service_key" {
     key_name = var.user_service_key_name
-    public_key = file("/home/prisca_priceless11/.ssh/user_service_key.pub")
+    public_key = file("${path.module}/user_service_key.pub")
 
 }
 
 resource "aws_key_pair" "product_service_key" {
     key_name = var.product_service_key_name
-    public_key = file("${path.root}/.ssh/product_service_key.pub")
+    public_key = file("${path.module}/product_service_key.pub")
 }
 
 resource "aws_instance" "user_service_instance" {
@@ -27,7 +27,7 @@ resource "aws_instance" "product_service_instance" {
 }
 
 data "template_file" "ansible_inventory" {
-    template = file("${path.root}/ansible_inventory.tpl")
+    template = file("${path.module}/ansible_inventory.tpl")
     vars = {
       user_instance = aws_instance.user_service_instance.id
       product_instance = aws_instance.product_service_instance.id
