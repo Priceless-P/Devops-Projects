@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sample-python-app-service-ingress
+spec:
+  rules:
+  - host: "foo.bar.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/demo"
+        backend:
+          service:
+            name: sample-python-app-service
+            port:
+              number: 80
+
