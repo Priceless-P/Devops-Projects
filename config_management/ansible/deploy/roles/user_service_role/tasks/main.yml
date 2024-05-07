@@ -4,32 +4,67 @@
   become: true
   pip:
     requirements: "{{ full_path }}/{{ app_name_user_service }}/requirements.txt"
+    virtualenv: "{{ full_path }}/venv"
+    virtualenv_python: python3
   tags: [install_dependencies]
-  when: inventory_hostname_in_groups['user_service_servers']
+
+- name: Fetch Terraform Outputs
+  delegate_to: localhost
+  command: terraform output -json
+  args:
+    chdir: "../../../../IaC/terraform/"
+  register: terraform_output
+  tags: [fetch_terraform_outputs]
+
+- name: Get Terraform Outputs
+  set_fact:
+    user_db_username_p: "{{ (terraform_output.stdout | from_json).user_db_username_p.value }}"
+    user_db_password_p: "{{ (terraform_output.stdout | from_json).user_db_password_p.value }}"
+    user_db_port_p: "{{ (terraform_output.stdout | from_json).user_db_port_p.value }}"
+    user_db_endpoint_p: "{{ (terraform_output.stdout | from_json).user_db_endpoint_p.value }}"
+    user_db_name_p: "{{ (terraform_output.stdout | from_json).user_db_name_p.value }}"
+
+- name: Create .env file for user_service
+  become: true
+  ansible.builtin.template:
+    src: templates/env_file.j2
+    dest: "{{ full_path }}/{{ app_name_user_service }}/.env"
+  tags: [create_env_file]
+
+- name: Print user_db_endpoint_p value to console
+  debug:
+    msg: "The user_db_endpoint_p value is {{ user_db_endpoint_p }}"
+
+- name: Add the Database URL
+  become: true
+  blockinfile:
+    path: "{{ full_path }}/{{ app_name_user_service }}/.env"
+    block: |
+      DEV_DATABASE_URL="mysql+pymysql://{{ user_db_username_p }}:{{ user_db_password_p }}@{{ user_db_endpoint_p }}/{{ user_db_name_p }}"
 
 - name: Flask database initialization
-  command: flask db init
+  become: true
+  command: "{{ full_path }}/venv/bin/flask db init"
   args:
     chdir: "{{ full_path }}/{{ app_name_user_service }}"
   tags: [db_init]
-  when: inventory_hostname in groups['user_service_servers']
 
 - name: Flask database migration
-  command: flask db migrate -m 'Initial migration'
+  become: true
+  command: "{{ full_path }}/venv/bin/flask db migrate -m 'Initial migration'"
   args:
     chdir: "{{ full_path }}/{{ app_name_user_service }}"
   tags: [db_migrate]
-  when: inventory_hostname in groups['user_service_servers']
 
 - name: Flask database upgrade
-  command: flask db upgrade
+  become: true
+  command: "{{ full_path }}/venv/bin/flask db upgrade"
   args:
     chdir: "{{ full_path }}/{{ app_name_user_service }}"
   tags: [db_upgrade]
-  when: inventory_hostname in groups['user_service_servers']
 
 - name: Run User microservice
-  command: flask run
+  command: "{{ full_path }}/venv/bin/flask run"
   args:
     chdir: "{{ full_path }}/{{ app_name_user_service }}"
   tags: [run_user_service]

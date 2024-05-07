@@ -1,0 +1,77 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    tools {
+        snykSecurity 'snyk'
+    }
+    parameters {
+        string(name: 'START_STAGE', defaultValue:'', description:'Stage to start build from')
+    }
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/jaiswaladi246/Python-Webapp.git'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    echo 'Installing Trivy'
+                    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+                    trivy --version
+                    echo 'Installing synk'
+                    npm install -g snyk
+                    snyk --version
+                '''
+            }
+        }
+        stage('Trivy Scan') {
+            steps {
+                sh 'trivy fs .'
+            }
+        }
+        stage('Bandit Code Analysis') {
+            steps {
+                sh 'bandit -r .'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh '''
+                        echo 'Building Docker Image'
+                        docker build -t priscachidimma/python-web-app:v${IMAGE_TAG} ./build/Dockerfile'''
+                }
+            }
+        }
+        stage(' Synk Image Scan') {
+            steps {
+                snykSecurity failOnIssues: false, monitorProjectOnBuild: false, snykInstallation: 'synk', snykTokenId: 'synk-token'
+                sh 'snyk container test priscachidimma/python-web-app:v${IMAGE_TAG} --file= ./build/Dockerfile'
+
+            }
+        }
+        stage('Push Artifacts') {
+            when {
+                expression {
+                    currentStage.name == params.START_STAGE || previousStage.result == 'SUCCESS'
+                }
+            }
+            steps {
+                sh '''
+                echo 'Pushing Image to Dockerhub'
+                docker push priscachidimma/python-web-app:v${IMAGE_TAG}
+                '''
+            }
+        }
+    }
+}

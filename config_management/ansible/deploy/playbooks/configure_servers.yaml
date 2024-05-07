@@ -1,6 +1,16 @@
 ---
-- name: Configure Servers
-  hosts: all
-  become: true
+# - name: Configure Servers
+#   hosts: all
+#   become: true
+#   roles:
+#     - common
+
+- name: Deploy application - User
+  hosts: user_service_servers
   roles:
-    - common
+    - user_service_role
+
+- name: Deploy application - Product
+  hosts: user_service_servers
+  roles:
+    - product_service_role

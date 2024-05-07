@@ -1,0 +1,22 @@
+#!/usr/bin/bash
+############################
+#
+# This script installs and configure minikube on Ubuntu
+#
+###########################
+
+sudo apt-get update
+
+# First install docker
+sudo apt update
+sudo apt install docker.io -yt
+sudo usermod -aG docker $USER
+sudo service docker start
+
+# Install kubectl
+sudo apt install snapd
+sudo snap install kubectl --classic
+
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+minikube start

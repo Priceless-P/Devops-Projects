@@ -1,0 +1,64 @@
+pipeline {
+    // agent any
+    agent {
+        docker {
+            image 'node:16'
+            args '-- user root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+        tools {
+            jdk 'jdk17'
+            nodejs 'nodejs16'
+        }
+        environment {
+            SCANNER_HOME = tool 'sonar-scanner'
+        }
+
+        stages {
+            stage('Git Checkout') {
+                steps {
+                    git branch: 'main', url: 'https://github.com/jaiswaladi246/fullstack-bank.git'
+                }
+
+            }
+            stage('OWASP Scan') {
+                steps {
+                    dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'DC'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                }
+            }
+            stage('Trivy FS Scan') {
+                steps{
+                    sh 'trivy fs --security-checks vuln,config .'
+                }
+            }
+            stage('SonarQube Analysis') {
+                steps {
+                    withSonarQubeEnv('sonar') {
+                        sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=BoardBank \
+                    -Dsonar.projectKey=BoardBank'''
+                    }
+                }
+            }
+            stage('Install Dependencies') {
+                steps {
+                    sh 'npm install'
+                }
+            }
+            stage('Install Backend Dependencies') {
+                steps {
+                        sh 'cd BoardBank/app/backend/ && npm install'
+                }
+            }
+            stage('Install Frontend Dependencies') {
+                steps {
+                        sh 'cd BoardBank/app/backend/ && npm install'
+                }
+            }
+            stage('Deploy Application') {
+                steps {
+                    sh 'npm run compose:up -d'
+                }
+            }
+        }
+    }

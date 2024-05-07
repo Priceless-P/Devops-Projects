@@ -13,6 +13,13 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
     security_group_id = aws_security_group.product_service_security_group.id
 }
 
+resource "aws_vpc_security_group_egress_rule" "allow_outbound_all_p" {
+    description = "Allow all outbound traffic"
+    ip_protocol = "-1"
+    cidr_ipv4 = var.cidr_block
+    security_group_id = aws_security_group.product_service_security_group.id
+}
+
 resource "aws_security_group" "product_service_security_group_db" {
     name = "product_service_security_group_db"
     description = "Allow app traffic to db"
