@@ -10,8 +10,6 @@ resource "aws_subnet" "user_service_subnet" {
   vpc_id = aws_vpc.ecom_vpc.id
   cidr_block = var.subnet_cidr_a
   availability_zone = "us-east-1a"
-  map_public_ip_on_launch = true
-
 }
 
 # Product service subnet
@@ -49,8 +47,13 @@ resource "aws_route" "private_route" {
     destination_cidr_block = "0.0.0.0/0"
 }
 
-resource "aws_route_table_association" "resource_association" {
+resource "aws_route_table_association" "resource_association_product" {
     subnet_id = aws_subnet.product_service_subnet.id
+    route_table_id = aws_route_table.private_route_table.id
+}
+
+resource "aws_route_table_association" "resource_association_user" {
+    subnet_id = aws_subnet.user_service_subnet.id
     route_table_id = aws_route_table.private_route_table.id
 }
 

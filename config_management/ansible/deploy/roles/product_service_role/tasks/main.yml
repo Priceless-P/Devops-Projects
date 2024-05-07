@@ -4,29 +4,34 @@
   become: true
   pip:
     requirements: "{{ full_path }}/{{ app_name_product_service }}/requirements.txt"
+    virtualenv: '{{ full_path }}/venv'
+    virtualenv_python: python3
   tags: [install_dependencies]
-  when: inventory_hostname_in_groups['product_service_servers']
+
+- name: Create .env file for product_service
+  become: true
+  ansible.builtin.template:
+    src: templates/env_file.j2
+    dest: "{{ full_path }}/{{ app_name_product_service }}/.env"
+  tags: [create_env_file]
 
 - name: Flask database initialization
   command: flask db init
   args:
     chdir: "{{ full_path }}/{{ app_name_product_service }}"
   tags: [db_init]
-  when: inventory_hostname in groups['product_service_servers']
 
 - name: Flask database migration
   command: flask db migrate -m 'Initial migration'
   args:
     chdir: "{{ full_path }}/{{ app_name_product_service }}"
   tags: [db_migrate]
-  when: inventory_hostname in groups['product_service_servers']
 
 - name: Flask database upgrade
   command: flask db upgrade
   args:
     chdir: "{{ full_path }}/{{ app_name_product_service }}"
   tags: [db_upgrade]
-  when: inventory_hostname in groups['product_service_servers']
 
 - name: Run User microservice
   command: flask run

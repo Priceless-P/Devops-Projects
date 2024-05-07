@@ -6,14 +6,16 @@
     state: latest
 
 - name: Install required system packages
+  become: true
   yum:
     name: "{{ item }}"
     state: present
   loop:
     - python3
-    - python3-pip
     - pip
     - git
+    - nginx
+    - mod_wsgi
   tags: [common_packages]
 
 - name: Clone repo
@@ -25,8 +27,12 @@
 - name: Create virtual Environment
   command:
     python3 -m venv venv
+  args:
+    chdir: "{{ full_path }}"
   tags: [venv_setup]
 
 - name: Activate virtual environment
-  command:  source "{{ full_path }}/venv/bin/activate"
+  shell:  source venv/bin/activate
+  args:
+    chdir: "{{ full_path }}"
   tags: [venv_activate]
